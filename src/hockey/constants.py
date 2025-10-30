@@ -1,0 +1,20 @@
+from enum import Enum
+
+# GAME SETTINGS
+WIDTH, HEIGHT = 800, 600
+
+PADDLE_W = 20
+PADDLE_H = PADDLE_W * 2.5
+
+GOAL_W = PADDLE_W * 3
+GOAL_H = PADDLE_H * 4
+GOAL_T = PADDLE_W
+GOAL_PADDING = PADDLE_W * 3 + GOAL_W // 2
+
+PADDLE_PADDING = GOAL_PADDING + GOAL_W + PADDLE_W
+
+# COLORS
+class Colors(Enum):
+    BLACK = (0, 0, 0)
+    YELLOW = (245, 194, 129)
+    BLUE = (99, 180, 225)
