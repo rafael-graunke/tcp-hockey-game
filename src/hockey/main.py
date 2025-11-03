@@ -16,59 +16,6 @@ from hockey.constants import (
     Colors,
 )
 
-class Action(Enum):
-    MOVE_UP = "move_up"
-    MOVE_DOWN = "move_down"
-    QUIT = "quit"
-
-class Game:
-    def __init__(self, width: int, height: int):
-        pygame.init()
-        self.screen = pygame.display.set_mode((width, height))
-        self.ball = None
-        self.player1 = None
-        self.player2 = None
-        self.goal1 = None
-        self.goal2 = None
-
-    def check_collisions(self):
-        ...
-
-    def capture_input(self) -> Action:
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_ESCAPE]:
-            return Action.QUIT
-        if keys[pygame.K_UP] and right_paddle.top > 0:
-            return Action.MOVE_UP
-        if keys[pygame.K_DOWN] and right_paddle.bottom < HEIGHT:
-            return Action.MOVE_DOWN
-        return None
-
-    def handle_input(self) -> Action:
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_ESCAPE]:
-            return Action.QUIT
-        if keys[pygame.K_UP] and right_paddle.top > 0:
-            return Action.MOVE_UP
-        if keys[pygame.K_DOWN] and right_paddle.bottom < HEIGHT:
-            return Action.MOVE_DOWN
-        return None
-
-    def update(self):
-        action = self.capture_input()
-        self.handle_input(action)
-        self.check_collisions()
-
-    def serve(self, port: int):
-        ...
-
-    def run(self):
-        while True:
-            self.update()
-
-    def quit(self):
-        ...
-
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Goal Pong")
