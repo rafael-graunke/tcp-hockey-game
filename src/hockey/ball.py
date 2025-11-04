@@ -57,29 +57,25 @@ class Ball:
     def handle_paddle_collision(self, player: Player):
         if self.rect.colliderect(player.rect):
             self._randomize_bounce()
-            # prevent sticking to paddles: push ball outside paddle
             if self.rect.centerx < player.rect.centerx:
                 self.rect.left = player.rect.left - self.rect.width
             else:
                 self.rect.right = player.rect.right + self.rect.width
 
     def handle_goal_collision_and_score(self, goal_left: Goal, goal_right: Goal, score_callback):
-        # let goals try to bounce first (outer mask), they mutate self.speed
         goal_left.bounce_ball(self.rect, self.speed, self.mask)
         goal_right.bounce_ball(self.rect, self.speed, self.mask)
 
-        # check if scored
         if goal_left.check_score(self.mask, (self.rect.x, self.rect.y)):
-            score_callback(1)  # right player scores
+            score_callback(1)
             self.reset()
             return
 
         if goal_right.check_score(self.mask, (self.rect.x, self.rect.y)):
-            score_callback(0)  # left player scores
+            score_callback(0)
             self.reset()
             return
 
-        # side wall bounce when passing side but not scoring
         if self.rect.left <= 0 and not goal_left.check_score(self.mask, (self.rect.x, self.rect.y)):
             self.speed[0] *= -1
         if self.rect.right >= WIDTH and not goal_right.check_score(self.mask, (self.rect.x, self.rect.y)):

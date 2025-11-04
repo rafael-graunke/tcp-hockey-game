@@ -44,19 +44,14 @@ class Goal(pygame.sprite.Sprite):
         offset = (int(ball_rect.x - self.rect.x), int(ball_rect.y - self.rect.y))
         collision_point = self.outer_mask.overlap(ball_mask, offset)
         if collision_point:
-            # Determine side of collision
             rel_x = collision_point[0]
             rel_y = collision_point[1]
 
-            # If collision near vertical edges (left/right of goal frame)
             if rel_x < self.thickness or rel_x > self.width - self.thickness:
                 ball_speed[0] *= -1  # bounce horizontally
-            # If collision near top/bottom edges
             elif rel_y < self.thickness or rel_y > self.height - self.thickness:
                 ball_speed[1] *= -1  # bounce vertically
             else:
-                # fallback: invert horizontal by default
                 ball_speed[0] *= -1
-            # Optional: add small randomness
             ball_speed[0] += random.uniform(-0.5, 0.5)
             ball_speed[1] += random.uniform(-0.5, 0.5)
