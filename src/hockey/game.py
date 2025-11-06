@@ -35,7 +35,6 @@ class Game:
         pygame.display.set_caption("Goal Pong")
         self.clock = pygame.time.Clock()
 
-        # entities
         self.player1 = Player(is_left=True)
         self.player2 = Player(is_left=False)
         self.ball = Ball()
@@ -46,7 +45,6 @@ class Game:
             height=GOAL_H,
             thickness=GOAL_T,
         )
-        # place right goal at symmetrical position
         right_goal_x = WIDTH - GOAL_PADDING - PADDLE_W
         self.goal2 = Goal(
             right_goal_x,
@@ -73,6 +71,13 @@ class Game:
             assert address, "Cannot connect to game without address."
             assert port, "Cannot connect to game without port."
             self.active_player = self.player2
+
+        self.game_duration = 3 * 60 * 1000
+        self.start_time = None
+        self.remaining_time = self.game_duration
+        self.game_over = False
+        self.winner_text = None
+        self.end_display_time = None
 
     def __encode_message(self, message: str) -> bytes:
         return f"{message}".encode()
@@ -109,7 +114,11 @@ class Game:
 
     def parse_game_state(self, message: str):
         try:
-            (player1_pos, ball_pos, score) = message.split("\n")
+            lines = message.split("\n")
+            if len(lines) < 6:
+                return
+            player1_pos, ball_pos, score, timer, game_over_flag, winner_text = lines[:6]
+
             (x, y) = player1_pos.split(" ")
             self.player1.x = float(x)
             self.player1.y = float(y)
@@ -120,14 +129,23 @@ class Game:
 
             (p1_score, p2_score) = score.split(" ")
             self.score = (int(p1_score), int(p2_score))
+
+            self.remaining_time = int(timer)
+            self.game_over = bool(int(game_over_flag))
+            self.winner_text = winner_text if winner_text.strip() else None
         except Exception:
             pass
+
 
     def create_game_state(self) -> str:
         message = f"{int(self.player1.x)} {int(self.player1.y)}\n"
         message += f"{int(self.ball.x)} {int(self.ball.y)}\n"
-        message += f"{self.score[0]} {self.score[1]}"
+        message += f"{self.score[0]} {self.score[1]}\n"
+        message += f"{self.remaining_time}\n"
+        message += f"{1 if self.game_over else 0}\n"
+        message += f"{self.winner_text if self.winner_text else ''}"
         return message
+
 
     def update_game_state(self):
         pos_msg = f"pos {int(self.player2.x)} {int(self.player2.y)}"
@@ -174,6 +192,37 @@ class Game:
             self.goal1, self.goal2, score_callback
         )
 
+    def check_timer(self):
+        if not self.server:
+            return
+
+        if self.game_over:
+            if pygame.time.get_ticks() - self.end_display_time >= 5000:
+                self.score = (0, 0)
+                self.ball.reset()
+                self.start_time = pygame.time.get_ticks()
+                self.game_over = False
+                self.winner_text = None
+                self.remaining_time = self.game_duration
+            return
+
+        if not self.start_time:
+            return
+
+        elapsed = pygame.time.get_ticks() - self.start_time
+        self.remaining_time = max(0, self.game_duration - elapsed)
+
+        if self.remaining_time == 0:
+            self.game_over = True
+            if self.score[0] > self.score[1]:
+                self.winner_text = "Player 1 Wins!"
+            elif self.score[1] > self.score[0]:
+                self.winner_text = "Player 2 Wins!"
+            else:
+                self.winner_text = "Draw!"
+            self.end_display_time = pygame.time.get_ticks()
+
+
     def render(self):
         self.screen.fill(Colors.BLUE.value)
         self.screen.blit(self.goal1.image, self.goal1.rect)
@@ -187,6 +236,17 @@ class Game:
         )
         self.screen.blit(score_text, (WIDTH // 2 - score_text.get_width() // 2, 20))
 
+        minutes = self.remaining_time // 60000
+        seconds = (self.remaining_time % 60000) // 1000
+
+        if not self.game_over:
+            timer_text = self.font.render(f"{minutes:01d}:{seconds:02d}", True, Colors.BLACK.value)
+            self.screen.blit(timer_text, (WIDTH // 2 - timer_text.get_width() // 2, 60))
+        else:
+            end_text = self.font.render(self.winner_text, True, Colors.BLACK.value)
+            self.screen.blit(end_text, (WIDTH // 2 - end_text.get_width() // 2, HEIGHT // 2 - 20))
+
+
         pygame.display.flip()
 
     def update(self):
@@ -198,6 +258,7 @@ class Game:
         self.handle_input(action)
 
         if self.server:
+            self.check_timer()
             self.check_collisions()
             state_msg = self.create_game_state()
             try:
@@ -218,6 +279,7 @@ class Game:
         conn, addr = server_sock.accept()
         print(f"[server] client connected: {addr}")
         self.sock = conn
+        self.start_time = pygame.time.get_ticks()
         server_sock.close()
 
     def run(self):
