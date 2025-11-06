@@ -2,6 +2,7 @@ import pygame
 import random
 from hockey.constants import Colors
 
+
 class Goal(pygame.sprite.Sprite):
     def __init__(self, x, y, width=40, height=200, thickness=10, rotate=0):
         super().__init__()
@@ -13,11 +14,19 @@ class Goal(pygame.sprite.Sprite):
 
         self.original_image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self._draw_outer_shape(self.original_image)
-        self.original_inner_surf = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        pygame.draw.rect(self.original_inner_surf, (255, 255, 255),
-                         (self.thickness, self.thickness,
-                          self.width - self.thickness,
-                          self.height - 2*self.thickness))
+        self.original_inner_surf = pygame.Surface(
+            (self.width, self.height), pygame.SRCALPHA
+        )
+        pygame.draw.rect(
+            self.original_inner_surf,
+            (255, 255, 255),
+            (
+                self.thickness,
+                self.thickness,
+                self.width - self.thickness,
+                self.height - 2 * self.thickness,
+            ),
+        )
 
         self.image = pygame.transform.rotate(self.original_image, self.rotate)
         self.inner_surf = pygame.transform.rotate(self.original_inner_surf, self.rotate)
@@ -29,7 +38,11 @@ class Goal(pygame.sprite.Sprite):
     def _draw_outer_shape(self, surf):
         pygame.draw.rect(surf, Colors.BLACK.value, (0, 0, self.thickness, self.height))
         pygame.draw.rect(surf, Colors.BLACK.value, (0, 0, self.width, self.thickness))
-        pygame.draw.rect(surf, Colors.BLACK.value, (0, self.height - self.thickness, self.width, self.thickness))
+        pygame.draw.rect(
+            surf,
+            Colors.BLACK.value,
+            (0, self.height - self.thickness, self.width, self.thickness),
+        )
 
     def check_bounce(self, ball_mask, ball_pos):
         offset = (int(ball_pos[0] - self.rect.x), int(ball_pos[1] - self.rect.y))

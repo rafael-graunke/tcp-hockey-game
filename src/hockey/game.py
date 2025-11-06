@@ -20,10 +20,12 @@ from hockey.constants import (
     Colors,
 )
 
+
 class Action(Enum):
     MOVE_UP = "move_up"
     MOVE_DOWN = "move_down"
     QUIT = "quit"
+
 
 class Game:
     def __init__(self, width: int, height: int, server=False, address=None, port=None):
@@ -37,10 +39,23 @@ class Game:
         self.player1 = Player(is_left=True)
         self.player2 = Player(is_left=False)
         self.ball = Ball()
-        self.goal1 = Goal(PADDLE_PADDING - GOAL_PADDING + GOAL_W // 2, HEIGHT // 2, width=GOAL_W, height=GOAL_H, thickness=GOAL_T)
+        self.goal1 = Goal(
+            PADDLE_PADDING - GOAL_PADDING + GOAL_W // 2,
+            HEIGHT // 2,
+            width=GOAL_W,
+            height=GOAL_H,
+            thickness=GOAL_T,
+        )
         # place right goal at symmetrical position
         right_goal_x = WIDTH - GOAL_PADDING - PADDLE_W
-        self.goal2 = Goal(right_goal_x, HEIGHT // 2, width=GOAL_W, height=GOAL_H, thickness=GOAL_T, rotate=180)
+        self.goal2 = Goal(
+            right_goal_x,
+            HEIGHT // 2,
+            width=GOAL_W,
+            height=GOAL_H,
+            thickness=GOAL_T,
+            rotate=180,
+        )
 
         self.active_player = None
 
@@ -155,7 +170,9 @@ class Game:
             else:
                 self.score = (self.score[0] + 1, self.score[1])
 
-        self.ball.handle_goal_collision_and_score(self.goal1, self.goal2, score_callback)
+        self.ball.handle_goal_collision_and_score(
+            self.goal1, self.goal2, score_callback
+        )
 
     def render(self):
         self.screen.fill(Colors.BLUE.value)
@@ -165,7 +182,9 @@ class Game:
         self.player2.render(self.screen)
         self.ball.render(self.screen)
 
-        score_text = self.font.render(f"{self.score[0]}   {self.score[1]}", True, Colors.BLACK.value)
+        score_text = self.font.render(
+            f"{self.score[0]}   {self.score[1]}", True, Colors.BLACK.value
+        )
         self.screen.blit(score_text, (WIDTH // 2 - score_text.get_width() // 2, 20))
 
         pygame.display.flip()

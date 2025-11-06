@@ -8,6 +8,7 @@ from hockey.constants import (
     Colors,
 )
 
+
 class Player:
     def __init__(self, is_left: bool, speed: int = 7):
         x = PADDLE_PADDING if is_left else WIDTH - PADDLE_PADDING - PADDLE_W

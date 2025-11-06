@@ -9,10 +9,13 @@ from hockey.constants import (
     Colors,
 )
 
+
 class Ball:
     def __init__(self, size: int = 30):
         self.size = size
-        self.rect = pygame.Rect(WIDTH // 2 - size // 2, HEIGHT // 2 - size // 2, size, size)
+        self.rect = pygame.Rect(
+            WIDTH // 2 - size // 2, HEIGHT // 2 - size // 2, size, size
+        )
         self.speed = [random.choice([-5, 5]), random.choice([-3, 3])]
         self.surf = pygame.Surface((size, size), pygame.SRCALPHA)
         pygame.draw.ellipse(self.surf, Colors.BLACK.value, (0, 0, size, size))
@@ -62,7 +65,9 @@ class Ball:
             else:
                 self.rect.right = player.rect.right + self.rect.width
 
-    def handle_goal_collision_and_score(self, goal_left: Goal, goal_right: Goal, score_callback):
+    def handle_goal_collision_and_score(
+        self, goal_left: Goal, goal_right: Goal, score_callback
+    ):
         goal_left.bounce_ball(self.rect, self.speed, self.mask)
         goal_right.bounce_ball(self.rect, self.speed, self.mask)
 
@@ -76,9 +81,13 @@ class Ball:
             self.reset()
             return
 
-        if self.rect.left <= 0 and not goal_left.check_score(self.mask, (self.rect.x, self.rect.y)):
+        if self.rect.left <= 0 and not goal_left.check_score(
+            self.mask, (self.rect.x, self.rect.y)
+        ):
             self.speed[0] *= -1
-        if self.rect.right >= WIDTH and not goal_right.check_score(self.mask, (self.rect.x, self.rect.y)):
+        if self.rect.right >= WIDTH and not goal_right.check_score(
+            self.mask, (self.rect.x, self.rect.y)
+        ):
             self.speed[0] *= -1
 
     def reset(self):
@@ -88,4 +97,3 @@ class Ball:
 
     def render(self, screen: pygame.Surface):
         screen.blit(self.surf, (self.rect.x, self.rect.y))
-
